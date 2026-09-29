@@ -3,18 +3,22 @@ package com.meireles.todolist_kotlin.ui.screens.home
 import com.meireles.todolist_kotlin.data.repositories.TaskCounts
 import com.meireles.todolist_kotlin.domain.model.Task
 
-/**Immutable state of the Home screen.*/
+/**
+ * Estado imutável da tela Home.
+ *
+ * @property isLoading indica operação em andamento.
+ * @property tasks lista de tarefas exibidas na UI.
+ * @property selectedTask tarefa selecionada, usada para destacar o item.
+ * @property counts agregado com contagens (total, concluídas, ativas).
+ * @property filterCompleted filtro atual por status de conclusão
+ *   (`true` = concluídas, `false` = em andamento, `null` = todas).
+ * @property error mensagem de erro exibida na UI, ou `null` se não houver.
+ */
 data class HomeUiState(
-    /**Indicates an ongoing operation.*/
     val isLoading: Boolean = false,
-    /**List of tasks displayed in the UI.*/
     val tasks: List<Task> = emptyList(),
-    /**Selected task, makes the item stand out.*/
     val selectedTask: Task? = null,
-    /**Aggregate with counts (total, completed, active)*/
     val counts: TaskCounts? = null,
-    /**Current filter by completion status.*/
     val filterCompleted: Boolean? = null,
-    /**Error message displayed in the UI.*/
     val error: String? = null,
 )
