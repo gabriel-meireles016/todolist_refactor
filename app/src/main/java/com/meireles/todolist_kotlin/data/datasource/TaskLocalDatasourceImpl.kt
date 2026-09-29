@@ -7,23 +7,21 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 /**
- * Implementation of the local data source.
+ * Implementação de [TaskLocalDatasource].
  *
- * This class acts as a bridge between the domain and the database (Room),
- * delegating operations to the DAO, but exposing only the TaskLocalDatasource interface
- *
- * Receives TaskDao via dependency injection (Hilt), enabling separation of responsibilities.
- * */
+ * Atua como ponte entre a camada de dados e o Room: delega as operações
+ * ao [TaskDao], mas expõe apenas o contrato [TaskLocalDatasource] para o
+ * restante do sistema. O [TaskDao] é injetado via Hilt.
+ */
 class TaskLocalDatasourceImpl @Inject constructor(
     private val taskDao: TaskDao
-): TaskLocalDatasource{
-    override suspend fun create(taskEntity: TaskEntity) : Long {
-        return taskDao.create(taskEntity)
-    }
+) : TaskLocalDatasource {
 
-    override fun getAll(isCompleted: Boolean?): Flow<List<TaskEntity>> {
-        return taskDao.getAll(isCompleted)
-    }
+    override suspend fun create(taskEntity: TaskEntity) : Long =
+        taskDao.create(taskEntity)
+
+    override fun getAll(isCompleted: Boolean?): Flow<List<TaskEntity>> =
+        taskDao.getAll(isCompleted)
 
     override suspend fun delete(id: Int) {
         taskDao.delete(id)
@@ -33,15 +31,14 @@ class TaskLocalDatasourceImpl @Inject constructor(
         taskDao.update(taskEntity)
     }
 
-    override fun getById(id: Int): Flow<TaskEntity?> {
-        return taskDao.getById(id)
-    }
+    override fun getById(id: Int): Flow<TaskEntity?> =
+        taskDao.getById(id)
 
     override suspend fun toggleStatus(id: Int) {
         taskDao.toggleStatus(id)
     }
 
-    override fun getNumber(): Flow<TaskCounts> {
-        return taskDao.getNumber()
-    }
+    override fun getCounts(): Flow<TaskCounts> =
+        taskDao.getCounts()
+
 }
