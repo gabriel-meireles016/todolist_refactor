@@ -1,52 +1,49 @@
 package com.meireles.todolist_kotlin.ui.nav_host
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import androidx.navigation.toRoute
 import com.meireles.todolist_kotlin.navigation.UIRoute
 import com.meireles.todolist_kotlin.ui.screens.add.screen.AddRoute
 import com.meireles.todolist_kotlin.ui.screens.home.screen.HomeRoute
 
-/**Main navigation graph of the app.*/
+/**
+ * Grafo de navegação principal do app.
+ *
+ * Mapeia cada [UIRoute] para o composable correspondente, conectando
+ * a navegação entre as telas Home, Add e Edit.
+ */
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MainNavHost(modifier: Modifier = Modifier) {
-
-    /**
-     * Navigation Controller to orchestrate navigation between Compose destinations.
-     * */
+fun MainNavHost() {
     val navController = rememberNavController()
 
-    // Define the NavHost, which maps destinations (routes) to Composable.
-    NavHost(navController = navController, startDestination = UIRoute.Home) {
-
-        // Route to Home Screen
+    NavHost(
+        navController = navController,
+        startDestination = UIRoute.Home
+    ) {
         composable<UIRoute.Home> {
             HomeRoute(
                 goAdd = { navController.navigate(UIRoute.Add) },
-                goEdit = {id -> navController.navigate(UIRoute.Edit(id))}
+                goEdit = { id -> navController.navigate(UIRoute.Edit(id.value.toInt())) }
             )
         }
 
-        // Route to Add Screen
         composable<UIRoute.Add> {
             AddRoute(
                 onSavedNavigateBack = { navController.popBackStack() },
-                onCancel = { navController.popBackStack() }
+                onBackClick = { navController.popBackStack() }
             )
         }
 
-        // Route to Edit Screen with typed argument (taskId: Int)
-        composable<UIRoute.Edit> { backStackEntry ->
+        composable<UIRoute.Edit> {
             AddRoute(
                 onSavedNavigateBack = { navController.popBackStack() },
-                onCancel = { navController.popBackStack() }
+                onBackClick = { navController.popBackStack() }
             )
         }
-
     }
 }
