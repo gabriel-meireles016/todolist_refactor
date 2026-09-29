@@ -2,6 +2,7 @@ package com.meireles.todolist_kotlin.ui.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.meireles.todolist_kotlin.domain.model.TaskId
 import com.meireles.todolist_kotlin.domain.repositories.TaskRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -13,48 +14,47 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/** Mensagem de erro padrão ao carregar tarefas. */
+private const val ERRO_AO_CARREGAR_TAREFAS = "Erro ao carregar tarefas"
+
 /**
- * ViewModel that connects UI Home <-> Domain/Data.
- * */
+ * ViewModel da tela Home.
+ *
+ * Conecta a UI ao domínio/dados: observa a lista de tarefas e as contagens
+ * de forma reativa, e expõe ações (filtrar, deletar, alternar status) que
+ * atualizam o estado da tela.
+ */
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    /**Injected repository*/private val repo: TaskRepository
+    private val repository: TaskRepository
 ) : ViewModel() {
-    /**Immutable screen state. Starts as 'loading' when a taskId exists (edit mode).*/
+
     private val _uiState = MutableStateFlow(HomeUiState(isLoading = true))
     val uiState: StateFlow<HomeUiState> = _uiState
 
-    // Coroutines states. Jobs to control collections.
-    // When changing filters or restarting observation, we cancel the previous one to avoid
-    // duplicate collections and leaks.
     /**
-     * Job responsible for observing the task list.
-     *
-     * It is canceled and recreated whenever the filter changes to avoid multiple simultaneous
-     * collections.
-     * */
+     * Job que observa a lista de tarefas.
+     * Cancelado e recriado sempre que o filtro muda.
+     */
     private var tasksJob: Job? = null
-    /**
-     * Job tha observes the aggregated counts (total, completed, active).
-     *
-     * Kept separate so that the counts update independently of the list.
-     * */
-    private var countsJob: Job? = null
-    /**
-     * Job used to observe/load a specific task by ID.
-     *
-     * It's canceled before starting a new search, avoiding competing results.
-     * */
-    private var taskByIdJob: Job? = null
 
-    // Each observer cancel previous job before starts another one.
-    // Avoid duplicated collects or leaks when filter changes
+    /**
+     * Job que observa as contagens agregadas (total, concluídas, ativas).
+     * Mantido separado para que as contagens atualizem independentemente da lista.
+     */
+    private var countsJob: Job? = null
+
     init {
         observeTasks()
         observeCounts()
     }
 
-    /** Define task filter (all/active/completed)*/
+    /**
+     * Define o filtro de exibição de tarefas.
+     *
+     * @param isCompleted `true` para concluídas, `false` para em andamento,
+     *   `null` para todas.
+     */
     fun setFilter(isCompleted: Boolean?) {
         _uiState.update {
             it.copy(
@@ -65,26 +65,29 @@ class HomeViewModel @Inject constructor(
         observeTasks()
     }
 
-    /**Observe tasks according to the current filter.*/
+    /**
+     * Observa a lista de tarefas de acordo com o filtro atual.
+     *
+     * Cancela a observação anterior antes de iniciar uma nova, evitando
+     * coletas duplicadas.
+     */
     private fun observeTasks() {
         tasksJob?.cancel()
         tasksJob = viewModelScope.launch {
-            repo.getAll(_uiState.value.filterCompleted)
-                // Use catch to handle errors in the flow.
+            repository.getAll(_uiState.value.filterCompleted)
                 .catch { e ->
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            error = e.message ?: "Erro ao carregar tarefas"
+                            error = e.message ?: ERRO_AO_CARREGAR_TAREFAS
                         )
                     }
-                    // If flow is re-emitted, it cancels the current collection and processes only
-                    // the most recent one
-                }.collectLatest { list ->
+                }
+                .collectLatest { tasks ->
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            tasks = list,
+                            tasks = tasks,
                             error = null
                         )
                     }
@@ -92,14 +95,16 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    /**Observe aggregated counts*/
+    /**
+     * Observa as contagens agregadas de tarefas.
+     */
     private fun observeCounts() {
         countsJob?.cancel()
         countsJob = viewModelScope.launch {
-            repo.getNumber()
+            repository.getCounts()
                 .catch { e ->
                     _uiState.update {
-                        it.copy(error = e.message)
+                        it.copy(error = e.message ?: ERRO_AO_CARREGAR_TAREFAS)
                     }
                 }
                 .collectLatest { counts ->
@@ -113,16 +118,33 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    /**Delete action that reports failures in 'error'.*/
-    fun delete(id: Int) = viewModelScope.launch {
-        runCatching { repo.delete(id) }
-            .onFailure { e -> _uiState.update { it.copy(error = e.message) } }
+    /**
+     * Remove a tarefa de [id].
+     * Falhas são registradas em [HomeUiState.error].
+     */
+    fun delete(id: TaskId) = viewModelScope.launch {
+        runCatching { repository.delete(id) }
+            .onFailure { e ->
+                _uiState.update {
+                    it.copy(
+                        error = e.message ?: ERRO_AO_CARREGAR_TAREFAS
+                    )
+                }
+            }
     }
 
-    /**Toggle status action that reports failures in 'error'.*/
-    fun toggleStatus(id: Int) = viewModelScope.launch {
-        runCatching { repo.toggleStatus(id) }
-            .onFailure { e -> _uiState.update { it.copy(error = e.message) } }
+    /**
+     * Alterna o status de conclusão da tarefa de [id].
+     * Falhas são registradas em [HomeUiState.error].
+     */
+    fun toggleStatus(id: TaskId) = viewModelScope.launch {
+        runCatching { repository.toggleStatus(id) }
+            .onFailure { e ->
+                _uiState.update {
+                    it.copy(
+                        error = e.message ?: ERRO_AO_CARREGAR_TAREFAS
+                    )
+                }
+            }
     }
-
 }
