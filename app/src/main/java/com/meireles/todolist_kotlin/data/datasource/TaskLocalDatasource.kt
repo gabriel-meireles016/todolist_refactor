@@ -5,31 +5,56 @@ import com.meireles.todolist_kotlin.data.repositories.TaskCounts
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Abstraction of the local data source responsible for managing tasks.
- * Hides the Room Implementation and facilitates maintenance and evolution.
- * */
+ * Contrato da fonte de dados local responsável por gerenciar tarefas.
+ *
+ * Abstrai a implementação concreta (Room/SQLite) e facilita manutenção e
+ * evolução — se a tecnologia de persistência mudar, apenas as implementações
+ * desta interface precisam ser atualizadas.
+ */
 interface TaskLocalDatasource {
 
-    /**Creates a task using local storage.*/
-    suspend fun create(taskEntity: TaskEntity) : Long
+    /**
+     * Cria uma nova tarefa no armazenamento local.
+     *
+     * @param taskEntity entidade a ser persistida; o `id` é ignorado.
+     * @return o identificador gerado pela persistência.
+     */
+    suspend fun create(taskEntity: TaskEntity): Long
 
-    /**Gets all tasks using local storage.*/
+    /**
+     * Retorna um fluxo reativo de tarefas, opcionalmente filtradas por status.
+     *
+     * O uso de [Flow] torna o acesso reativo: mudanças no banco são
+     * automaticamente refletidas na coleta.
+     *
+     * @param isCompleted `true` para apenas concluídas, `false` para apenas
+     *   em andamento, `null` para todas.
+     */
     fun getAll(isCompleted: Boolean?): Flow<List<TaskEntity>>
-    // Flow makes access more reactive by implementing changes automatically.
 
-    /**Deletes a task by ID using local storage.*/
+    /**
+     * Remove a tarefa identificada por [id] do armazenamento local.
+     */
     suspend fun delete(id: Int)
 
-    /**Updates a task using local storage.*/
+    /**
+     * Atualiza uma tarefa existente no armazenamento local.
+     */
     suspend fun update(taskEntity: TaskEntity)
 
-    /**Gets a task by ID using local storage.*/
+    /**
+     * Retorna um fluxo reativo com a tarefa de [id], ou `null` se não existir.
+     */
     fun getById(id: Int): Flow<TaskEntity?>
 
-    /**Toggles task status using local storage.*/
+    /**
+     * Alterna o estado de conclusão da tarefa identificada por [id].
+     */
     suspend fun toggleStatus(id: Int)
 
-    /**Gets number of all, completed and in progress tasks using local storage.*/
-    fun getNumber(): Flow<TaskCounts>
+    /**
+     * Retorna um fluxo reativo com as contagens de tarefas por estado.
+     */
+    fun getCounts(): Flow<TaskCounts>
 
 }
