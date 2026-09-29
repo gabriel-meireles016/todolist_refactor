@@ -9,17 +9,24 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 /**
- * Dependency injection module (Hilt) for the repository layer.
- * */
+ * Módulo Hilt responsável por ligar as abstrações da camada de domínio
+ * às suas implementações concretas na camada de dados.
+ *
+ * As dependências são registradas no [SingletonComponent], garantindo
+ * que a mesma instância de repositório seja reutilizada durante todo o
+ * ciclo de vida da aplicação.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
     /**
-     * Informs Hilt that when someone needs TaskRepository, should
-     * inject the TaskRepositoryImpl.
-     * */
-    @Binds @Singleton
+     * Informa ao Hilt que, quando alguém solicitar [TaskRepository],
+     * deve injetar uma instância de [TaskRepositoryImpl].
+     */
+    @Binds
+    @Singleton
     abstract fun bindTaskRepository(
         impl: TaskRepositoryImpl
     ): TaskRepository
+
 }
