@@ -1,8 +1,11 @@
 package com.meireles.todolist_kotlin.ui.screens.home.screen
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,65 +45,90 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.meireles.todolist_kotlin.domain.model.Task
+import com.meireles.todolist_kotlin.domain.model.TaskId
 import com.meireles.todolist_kotlin.ui.components.AddButton
 import com.meireles.todolist_kotlin.ui.components.AppBarPattern
 import com.meireles.todolist_kotlin.ui.components.TaskFilter
 import com.meireles.todolist_kotlin.ui.components.next
 import com.meireles.todolist_kotlin.ui.components.toBooleanOrNull
 import com.meireles.todolist_kotlin.ui.screens.home.HomeUiState
-import com.meireles.todolist_kotlin.ui.theme.deepPurple50
 import java.text.SimpleDateFormat
+import java.time.Instant
 import java.util.Date
 import java.util.Locale
 
-/**Main app screen.*/
+/** Valor sentinela para "nenhuma tarefa selecionada". */
+private const val ID_NENHUM_SELECIONADO = -1
+
+/** Padding vertical da lista de tarefas. */
+private val PADDING_LISTA_VERTICAL = 16.dp
+
+/** Padding horizontal dos itens da lista. */
+private val PADDING_ITEM_HORIZONTAL = 16.dp
+
+/** Padding vertical dos itens da lista. */
+private val PADDING_ITEM_VERTICAL = 8.dp
+
+/** Padding interno do card de tarefa. */
+private val PADDING_CARD = 16.dp
+
+/** Espaçamento entre o ícone de toggle e o conteúdo do card. */
+private val ESPACAMENTO_ICONE_CONTEUDO = 16.dp
+
+/** Elevação padrão dos cards de tarefa. */
+private val ELEVACAO_CARD = 6.dp
+
+/** Padding vertical dos itens do bottom sheet. */
+private val PADDING_ITEM_SHEET = 4.dp
+
+/** Formato de data padrão usado na UI. */
+private const val FORMATO_DATA_PADRAO = "dd/MM/yyyy"
+
+/** Valor exibido quando a data não pode ser formatada. */
+private const val DATA_INVALIDA = "-"
+
+/**
+ * Tela principal do app.
+ *
+ * @param goAdd callback de navegação para a tela de adição.
+ * @param goEdit callback de navegação para a tela de edição.
+ * @param state estado atual da tela.
+ * @param onToggleComplete callback para alternar o status de conclusão.
+ * @param onDelete callback para deletar uma tarefa.
+ * @param onFilterChange callback para alterar o filtro.
+ */
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    /**Navigates to add screen.*/
     goAdd: () -> Unit,
-    /**Navigates to edit screen.*/
-    goEdit: (Int) -> Unit,
-    /**Screen state.*/
+    goEdit: (TaskId) -> Unit,
     state: HomeUiState,
-    /**Toggles task status.*/
-    onToggleComplete: (Int) -> Unit,
-    /**Deletes task.*/
-    onDelete: (Int) -> Unit,
-    /**Changes filter between null/all, false/active and true/completed.*/
+    onToggleComplete: (TaskId) -> Unit,
+    onDelete: (TaskId) -> Unit,
     onFilterChange: (Boolean?) -> Unit
 ) {
 
-    // === BottomSheet - UI local states ===
-    /**Controls display of the bottom sheet. */
     var showSheet by remember { mutableStateOf(false) }
-    /**ID of the item selected in the sheet.*/
-    var selectedId by remember { mutableStateOf(-1) }
-    /**Show/hide search bar*/
+    var selectedId by remember { mutableStateOf(TaskId(ID_NENHUM_SELECIONADO.toLong())) }
     var searchVisible by remember { mutableStateOf(false) }
-    /**Search text in the search bar.*/
     var searchText by remember { mutableStateOf(TextFieldValue("")) }
-    /**Bottom sheet state. skipPartiallyExpanded avoid 'semi-open' state.*/
+
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true,
-        confirmValueChange = { newValue ->
-            newValue != SheetValue.PartiallyExpanded
-        }
+        confirmValueChange = { it != SheetValue.PartiallyExpanded }
     )
 
-    // Filter
     var currentFilter by rememberSaveable { mutableStateOf(TaskFilter.ALL) }
     val cycleFilter: () -> Unit = {
         currentFilter = currentFilter.next()
         onFilterChange(currentFilter.toBooleanOrNull())
     }
 
-    // Keep local filter synchronized with filter from state (ViewModel)
     LaunchedEffect(state.filterCompleted) {
         val expected = when (state.filterCompleted) {
             null -> TaskFilter.ALL
@@ -113,7 +141,7 @@ fun HomeScreen(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        containerColor = deepPurple50,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         topBar = {
             AppBarPattern(
                 counts = state.counts,
@@ -124,79 +152,34 @@ fun HomeScreen(
         floatingActionButton = {
             AddButton(
                 goAdd = goAdd,
-                onSearch = { searchVisible = true },
+                onSearch = { searchVisible = true }
             )
         }
     ) { innerPadding ->
-
-
-
-        // Filtering by text
-        val filteredTask: List<Task> = remember(state.tasks, searchText.text) {
-            if (searchText.text.isBlank()) state.tasks
-            else {
-                val q = searchText.text.trim()
-                state.tasks.filter { t ->
-                    t.title.contains(q, ignoreCase = true) ||
-                            (t.description?.contains(q, ignoreCase = true) == true) ||
-                            t.id.toString() == q
-                }
-            }
+        val filteredTasks: List<Task> = remember(state.tasks, searchText.text) {
+            filterTasks(state.tasks, searchText.text)
         }
 
         LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(vertical = 16.dp),
+                .padding(vertical = PADDING_LISTA_VERTICAL),
         ) {
-            // Search bar
             item {
-
-                AnimatedVisibility(
+                SearchBar(
                     visible = searchVisible,
-                    enter = expandVertically(),
-                    exit = shrinkVertically()
-                ) {
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        value = searchText,
-                        label = { Text(text = "Buscar...") },
-                        onValueChange = { searchText = it },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = null
-                            )
-                        },
-                        trailingIcon = {
-                            IconButton(
-                                onClick = { searchVisible = false }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = null
-                                )
-                            }
-                        }
-                    )
-                }
+                    query = searchText,
+                    onQueryChange = { searchText = it },
+                    onClose = { searchVisible = false }
+                )
             }
 
-            // Cards
-            if (filteredTask.isEmpty()) {
-                item {
-                    EmptyState()
-                }
+            if (filteredTasks.isEmpty()) {
+                item { EmptyState() }
             } else {
-                items(
-                    items = filteredTask,
-                    key = { it.id }
-                ) { task ->
+                items(items = filteredTasks, key = { it.id.value }) { task ->
                     TaskCard(
                         task = task,
-                        onClick = {},
                         onLongPress = {
                             selectedId = task.id
                             showSheet = true
@@ -205,10 +188,8 @@ fun HomeScreen(
                     )
                 }
             }
-
         }
 
-        // Bottom sheet for the selected item.
         if (showSheet) {
             ModalBottomSheet(
                 onDismissRequest = { showSheet = false },
@@ -231,57 +212,120 @@ fun HomeScreen(
     }
 }
 
-/**Card with title, ID, description (if any) and creation date about a task.*/
+/** Filtra tarefas pelo texto de busca (título, descrição ou ID). */
+private fun filterTasks(tasks: List<Task>, query: String): List<Task> {
+    if (query.isBlank()) return tasks
+    val q = query.trim()
+    return tasks.filter { task ->
+        task.title.value.contains(q, ignoreCase = true) ||
+                (task.description?.value?.contains(q, ignoreCase = true) == true) ||
+                task.id.value.toString() == q
+    }
+}
+
+@Composable
+private fun SearchBar(
+    visible: Boolean,
+    query: TextFieldValue,
+    onQueryChange: (TextFieldValue) -> Unit,
+    onClose: () -> Unit
+) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = expandVertically(),
+        exit = shrinkVertically()
+    ) {
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = PADDING_ITEM_HORIZONTAL),
+            value = query,
+            label = { Text(text = "Buscar...") },
+            onValueChange = onQueryChange,
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = null
+                )
+            },
+            trailingIcon = {
+                IconButton(onClick = onClose) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Fechar busca"
+                    )
+                }
+            }
+        )
+    }
+}
+
+/**
+ * Card de tarefa com título, ID, descrição (se houver) e data de criação.
+ */
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun TaskCard(
     task: Task,
-    onClick: () -> Unit,
     onLongPress: () -> Unit,
-    onToggle: () -> Unit,
+    onToggle: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(
+                horizontal = PADDING_ITEM_HORIZONTAL,
+                vertical = PADDING_ITEM_VERTICAL
+            )
             .combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongPress,
+                onClick = {},
+                onLongClick = onLongPress
             ),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White
+            containerColor = MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 6.dp
-        )
+        elevation = CardDefaults.cardElevation(defaultElevation = ELEVACAO_CARD)
     ) {
-
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(all = 16.dp)
-        )
-        {
-            IconButton(onClick = onToggle, modifier = Modifier.padding(end = 16.dp)) {
+            modifier = Modifier.padding(all = PADDING_CARD)
+        ) {
+            IconButton(
+                onClick = onToggle,
+                modifier = Modifier.padding(end = ESPACAMENTO_ICONE_CONTEUDO)
+            ) {
                 Icon(
-                    imageVector = if (task.isCompleted) Icons.Outlined.CheckCircle else Icons.Outlined.Circle,
-                    contentDescription = null,
+                    imageVector = if (task.isCompleted) {
+                        Icons.Outlined.CheckCircle
+                    } else {
+                        Icons.Outlined.Circle
+                    },
+                    contentDescription = if (task.isCompleted) {
+                        "Tarefa concluída"
+                    } else {
+                        "Tarefa em andamento"
+                    }
                 )
             }
 
             Column {
                 Text(
-                    text = task.title,
+                    text = task.title.value,
                     style = MaterialTheme.typography.titleMedium
                 )
+
                 Text(
-                    text = "ID: ${task.id}",
+                    text = "ID: ${task.id.value}",
                     style = MaterialTheme.typography.bodyMedium
                 )
+
                 task.description?.let {
                     Text(
-                        text = "Descrição: $it",
+                        text = "Descrição: ${it.value}",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
+
                 Text(
                     text = "Criado em: ${task.createdAt.formatAsDate()}",
                     style = MaterialTheme.typography.bodyMedium
@@ -291,82 +335,91 @@ private fun TaskCard(
     }
 }
 
-/**Displays an empty state for the task list when there are no items to show.*/
+/** Estado vazio exibido quando não há tarefas para mostrar. */
 @Composable
-fun EmptyState(modifier: Modifier = Modifier) {
+private fun EmptyState(modifier: Modifier = Modifier) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(16.dp), contentAlignment = Alignment.Center
+            .padding(PADDING_ITEM_HORIZONTAL),
+        contentAlignment = Alignment.Center
     ) {
-        Text(text = "Nenhuma tarefa encontrada.", style = MaterialTheme.typography.bodyMedium)
+        Text(
+            text = "Nenhuma tarefa encontrada.",
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }
 
-/**Bottom sheet with actions applicable to the selected item in the task list.*/
+/**
+ * Bottom sheet com ações aplicáveis à tarefa selecionada.
+ */
 @Composable
-fun ActionsSheet(
-    modifier: Modifier = Modifier,
-    selectedId: Int,
+private fun ActionsSheet(
+    selectedId: TaskId,
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(
+                horizontal = PADDING_ITEM_HORIZONTAL,
+                vertical = PADDING_ITEM_VERTICAL
+            )
     ) {
         Text(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            text = "Ações para o item #$selectedId",
+                .padding(bottom = PADDING_CARD),
+            text = "Ações para o item #${selectedId.value}",
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center
         )
 
-        ListItem(
-            headlineContent = { Text("Editar") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp)
-                .combinedClickable(onClick = onEdit),
-            leadingContent = {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = null
-                )
-            },
-            colors = ListItemDefaults.colors(
-                containerColor = Color.White
-            )
+        ActionItem(
+            label = "Editar",
+            icon = Icons.Default.Edit,
+            onClick = onEdit
         )
 
-
-        ListItem(
-            headlineContent = { Text("Excluir") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp)
-                .combinedClickable(onClick = onDelete),
-            leadingContent = {
-                Icon(
-                    imageVector = Icons.Default.Remove,
-                    contentDescription = null
-                )
-            },
-            colors = ListItemDefaults.colors(
-                containerColor = Color.White
-            )
+        ActionItem(
+            label = "Excluir",
+            icon = Icons.Default.Remove,
+            onClick = onDelete
         )
     }
 }
 
-
-/**Conversion date*/
-private fun Long.formatAsDate(pattern: String = "dd/MM/yyyy"): String {
-    return runCatching {
-        val sdf = SimpleDateFormat(pattern, Locale.getDefault())
-        sdf.format(Date(this))
-    }.getOrDefault("-")
+@Composable
+private fun ActionItem(
+    label: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    onClick: () -> Unit
+) {
+    ListItem(
+        headlineContent = { Text(label) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = PADDING_ITEM_SHEET)
+            .clickable(onClick = onClick),
+        leadingContent = {
+            Icon(imageVector = icon, contentDescription = null)
+        },
+        colors = ListItemDefaults.colors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    )
 }
+
+/**
+ * Converte um [Instant] para string no formato [pattern].
+ *
+ * @param pattern formato de data (padrão: `dd/MM/yyyy`).
+ * @return a data formatada, ou [DATA_INVALIDA] se a conversão falhar.
+ */
+@RequiresApi(Build.VERSION_CODES.O)
+fun Instant.formatAsDate(pattern: String = FORMATO_DATA_PADRAO): String =
+    runCatching {
+        SimpleDateFormat(pattern, Locale.getDefault()).format(Date.from(this))
+    }.getOrDefault(DATA_INVALIDA)
