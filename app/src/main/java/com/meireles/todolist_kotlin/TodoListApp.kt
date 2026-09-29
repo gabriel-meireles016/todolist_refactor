@@ -4,12 +4,11 @@ import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
 
 /**
- * Initializes global components before any Activity or Composable is created.
+ * Classe `Application` do app.
  *
- * Registers the MainServiceLocator with the application context, allowing dependencies
- * such as the database and repositories to be created and accessed throughout the app.
- *
- * The annotation informs Hilt that is the Application used to generate the global dependency graph.
- * */
+ * Anotada com `@HiltAndroidApp` para que o Hilt gere o grafo global de
+ * dependências e permita injeção em Activities, ViewModels e outros
+ * componentes do app.
+ */
 @HiltAndroidApp
 class TodoListApp : Application()
