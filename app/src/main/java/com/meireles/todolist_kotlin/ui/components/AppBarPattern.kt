@@ -75,7 +75,7 @@ fun AppBarPattern(
         },
         navigationIcon = {
             if (showBackButton) {
-                BackButton(onCancel = onBackClick)
+                BackButton(onBackClick = onBackClick)
             }
         },
         actions = {

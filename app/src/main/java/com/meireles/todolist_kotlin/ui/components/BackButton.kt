@@ -6,30 +6,32 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
-/**Reusable component of a back-page arrow.*/
+/** Padding interno do botão de voltar. */
+private val PADDING_BOTAO_VOLTAR = 8.dp
+
+/**
+ * Componente reutilizável de seta de voltar.
+ *
+ * @param onBackClick callback acionado ao clicar na seta.
+ */
 @Composable
-fun BackButton(onCancel: () -> Unit = {}) {
+fun BackButton(onBackClick: () -> Unit = {}) {
     IconButton(
-        modifier = Modifier.padding(all = 8.dp),
-        onClick = { onCancel() },
+        modifier = Modifier.padding(all = PADDING_BOTAO_VOLTAR),
+        onClick = onBackClick,
         colors = IconButtonDefaults.iconButtonColors(
-            contentColor = Color.White,
-            containerColor = Color.Transparent
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            containerColor = MaterialTheme.colorScheme.primary
         )
     ) {
-        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = "Voltar"
+        )
     }
-}
-
-
-@Preview
-@Composable
-private fun BackButtonPreview() {
-    BackButton()
 }
