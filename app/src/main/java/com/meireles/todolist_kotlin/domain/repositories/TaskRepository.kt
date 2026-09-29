@@ -2,35 +2,60 @@ package com.meireles.todolist_kotlin.domain.repositories
 
 import com.meireles.todolist_kotlin.data.repositories.TaskCounts
 import com.meireles.todolist_kotlin.domain.model.Task
+import com.meireles.todolist_kotlin.domain.model.TaskId
 import kotlinx.coroutines.flow.Flow
 
 // Ui should depend on this interface and not directly on DAOs or datasources
 
 /**
- * Domain layer contract. The UI depend ONLY on this contract; that is, no class in this layer
- * should know details about database.
- * */
+ * Contrato da camada de domínio para operações sobre [Task].
+ *
+ * A UI deve depender **apenas** desta interface — nunca diretamente de DAOs
+ * ou fontes de dados. Isso mantém a camada de apresentação independente de
+ * detalhes de persistência (banco, cache, rede).
+ */
 interface TaskRepository {
 
-    /**Creates a new task and returns the generated ID.*/
-    suspend fun create(task: Task) : Long
+    /**
+     * Cria uma nova [Task] e retorna o identificador gerado.
+     *
+     * @param task tarefa a ser persistida; o `id` é ignorado e substituído
+     *   pelo valor gerado pela camada de persistência.
+     * @return o [TaskId] atribuído à tarefa criada.
+     */
+    suspend fun create(task: Task) : TaskId
 
-    /**Get tasks, optionally filtered by completion status.*/
+    /**
+     * Retorna um fluxo reativo de tarefas, opcionalmente filtradas por status.
+     *
+     * @param isCompleted `true` para apenas concluídas, `false` para apenas
+     *   em andamento, `null` para todas.
+     */
     fun getAll(isCompleted: Boolean?): Flow<List<Task>>
 
-    /**Deletes a task by its ID.*/
-    suspend fun delete(id: Int)
+    /**
+     * Remove a tarefa identificada por [id].
+     */
+    suspend fun delete(id: TaskId)
 
-    /**Updates a task.*/
+    /**
+     * Atualiza os dados de uma [Task] já existente.
+     */
     suspend fun update(task: Task)
 
-    /**Gets a task by ID.*/
-    fun getById(id: Int): Flow<Task?>
+    /**
+     * Retorna um fluxo reativo com a tarefa de [id], ou `null` se não existir.
+     */
+    fun getById(id: TaskId): Flow<Task?>
 
-    /**Toggles the completion status of a task by ID.*/
-    suspend fun toggleStatus(id: Int)
+    /**
+     * Alterna o estado de conclusão da tarefa identificada por [id].
+     */
+    suspend fun toggleStatus(id: TaskId)
 
-    /**Returns reactive counters about task completion status.*/
-    fun getNumber(): Flow<TaskCounts>
+    /**
+     * Retorna um fluxo reativo com as contagens de tarefas por estado.
+     */
+    fun getCounts(): Flow<TaskCounts>
 
 }
