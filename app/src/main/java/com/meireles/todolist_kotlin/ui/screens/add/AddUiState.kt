@@ -1,30 +1,33 @@
 package com.meireles.todolist_kotlin.ui.screens.add
 
-/**Immutable state of the Add/Edit task screen.*/
+import com.meireles.todolist_kotlin.domain.model.TaskId
+
+/**
+ * Estado imutável da tela de Adição/Edição de tarefa.
+ *
+ * @property isLoading indica operação em andamento.
+ * @property isEditing `false` para criação de nova tarefa; `true` para edição
+ *   de tarefa existente.
+ * @property id identificador da tarefa em edição, ou `null` se for criação.
+ * @property title campo editável de título no formulário.
+ * @property description campo editável de descrição no formulário.
+ * @property createdAt instante de criação em milissegundos (Unix time),
+ *   fornecido pela camada de dados.
+ * @property isCompleted estado de conclusão da tarefa.
+ * @property isValid flag de validação do formulário (tipicamente: título obrigatório).
+ * @property error mensagem de erro exibida na UI, ou `null` se não houver.
+ * @property isSaved sinaliza que a tarefa foi salva com sucesso; a UI
+ *   observa e navega de volta quando `true`.
+ */
 data class AddUiState(
-    /**Indicates an ongoing operation.*/
     val isLoading: Boolean = false,
-    /**Differentiates the screen mode:
-     *
-     * false -> creating a new task
-     *
-     * true -> editing an existing task
-     * */
     val isEditing: Boolean = false,
-    /**Task ID.*/
-    val id: Int? = null,
-    /**Editable title field in the form.*/
+    val id: TaskId? = null,
     val title: String = "",
-    /**Editable description field in the form.*/
     val description: String = "",
-    /**Metadata created by repository/data layer*/
     val createdAt: Long? = null,
-    /**Task completion status.*/
     val isCompleted: Boolean = false,
-    /**General form validation flag (typical: required title).*/
     val isValid: Boolean = false,
-    /**Error message displayed in the UI.*/
     val error: String? = null,
-    /**Event/state of "successfully saved". The UI observes and navigates back when this is true.*/
     val isSaved: Boolean = false
 )
