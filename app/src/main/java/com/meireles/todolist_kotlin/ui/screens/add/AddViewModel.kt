@@ -1,54 +1,77 @@
 package com.meireles.todolist_kotlin.ui.screens.add
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.meireles.todolist_kotlin.data.database.TaskEntity
+import com.meireles.todolist_kotlin.domain.model.Description
 import com.meireles.todolist_kotlin.domain.model.Task
+import com.meireles.todolist_kotlin.domain.model.TaskId
+import com.meireles.todolist_kotlin.domain.model.Title
 import com.meireles.todolist_kotlin.domain.repositories.TaskRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.Instant
 import javax.inject.Inject
 
+/** Chave do argumento de navegação que identifica a tarefa em edição. */
+private const val ARG_TASK_ID = "taskId"
+
+/** Mensagens de erro padrão da tela. */
+private const val ERRO_CARREGAR_TAREFA = "Erro ao carregar tarefa."
+private const val ERRO_TAREFA_NAO_ENCONTRADA = "Tarefa não encontrada."
+private const val ERRO_TITULO_VAZIO = "O título não pode estar vazio."
+private const val ERRO_SALVAR_TAREFA = "Falha ao salvar."
+
 /**
- * ViewModel that connects UI Add <-> Domain/Data.
- * */
+ * ViewModel da tela de Adição/Edição de tarefa.
+ *
+ * Conecta a UI ao domínio/dados: em modo edição, carrega a tarefa pelo
+ * [SavedStateHandle]; expõe ações de formulário (título, descrição) e
+ * salvamento (criação ou atualização).
+ */
 @HiltViewModel
 class AddViewModel @Inject constructor(
-    /**Injected repository*/
-    private val repo: TaskRepository,
-    /**By this state, receives taskId via route args.*/
+    private val repository: TaskRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-    /**Task Identifier*/
-    private val taskId: Int? = savedStateHandle["taskId"]
 
-    /**Immutable screen state. Starts as 'loading' when a taskId exists (edit mode).*/
-    private val _uiState =
-        MutableStateFlow(AddUiState(isLoading = taskId != null, isEditing = taskId != null))
+    private val taskId: TaskId? = savedStateHandle.get<Int>(ARG_TASK_ID)?.let { TaskId(it.toLong()) }
 
-    /**Secure access of UI state.*/
+    private val _uiState = MutableStateFlow(
+        AddUiState(
+            isLoading = taskId != null,
+            isEditing = taskId != null
+        )
+    )
     val uiState: StateFlow<AddUiState> = _uiState
 
-    // Initializes AddViewModel. If it's an edit mode, load the task to fill in the fields.
+    /** Job que observa a tarefa em edição. Cancelado antes de nova observação. */
+    private var loadJob: Job? = null
+
     init {
-        if (taskId != null) load(taskId)
+        taskId?.let(::load)
     }
 
-    /**Load task as Flow (reactive) and inject in state.*/
-    private fun load(id: Int) {
-        viewModelScope.launch {
-            repo.getById(id)
+    /**
+     * Carrega a tarefa de [id] de forma reativa e atualiza o estado do formulário.
+     */
+    private fun load(id: TaskId) {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
+            repository.getById(id)
                 .catch { e ->
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            error = e.message ?: "Erro ao carregar tarefa."
+                            error = e.message ?: ERRO_CARREGAR_TAREFA
                         )
                     }
                 }
@@ -57,7 +80,7 @@ class AddViewModel @Inject constructor(
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
-                                error = "Tarefa não encontrada."
+                                error = ERRO_TAREFA_NAO_ENCONTRADA
                             )
                         }
                     } else {
@@ -65,10 +88,10 @@ class AddViewModel @Inject constructor(
                             it.copy(
                                 isLoading = false,
                                 id = task.id,
-                                title = task.title,
-                                description = task.description.orEmpty(),
+                                title = task.title.value,
+                                description = task.description?.value.orEmpty(),
                                 isCompleted = task.isCompleted,
-                                isValid = task.title.isNotBlank(),
+                                isValid = task.title.value.isNotBlank(),
                                 error = null
                             )
                         }
@@ -77,7 +100,9 @@ class AddViewModel @Inject constructor(
         }
     }
 
-    /**Update title on the edit mode.*/
+    /**
+     * Atualiza o título no formulário.
+     */
     fun onTitleChange(newTitle: String) {
         _uiState.update {
             it.copy(
@@ -88,71 +113,76 @@ class AddViewModel @Inject constructor(
         }
     }
 
-    /**Update description on the edit mode.*/
-    fun onDescriptionChange(newDesc: String) {
+    /**
+     * Atualiza a descrição no formulário.
+     */
+    fun onDescriptionChange(newDescription: String) {
         _uiState.update {
             it.copy(
-                description = newDesc,
+                description = newDescription,
                 error = null
             )
         }
     }
 
-    /**Save fields and create task.*/
+    /**
+     * Salva a tarefa: cria uma nova ou atualiza a existente.
+     *
+     * Falhas são registradas em [AddUiState.error]; sucesso marca
+     * [AddUiState.isSaved] como `true`.
+     */
+    @RequiresApi(Build.VERSION_CODES.O)
     fun save() {
         val state = _uiState.value
         if (!state.isValid) {
-            _uiState.update {
-                it.copy(
-                    error = "O título não pode estar vazio."
-                )
-            }
+            _uiState.update { it.copy(error = ERRO_TITULO_VAZIO) }
             return
         }
 
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(
-                    isLoading = true,
-                    error = null
-                )
-            }
+            _uiState.update { it.copy(isLoading = true, error = null) }
+
             runCatching {
+                val task = state.toDomainTask()
                 if (state.isEditing) {
-                    val task = Task(
-                        id = state.id ?: error("ID nulo em modo edição."),
-                        title = state.title.trim(),
-                        description = state.description.ifBlank { null },
-                        createdAt = state.createdAt ?: System.currentTimeMillis(),
-                        isCompleted = state.isCompleted,
-                    )
-                    repo.update(task)
+                    repository.update(task)
                 } else {
-                    val task = Task(
-                        id = 0,
-                        title = state.title.trim(),
-                        description = state.description.ifBlank { null },
-                        createdAt = System.currentTimeMillis(),
-                        isCompleted = false
-                    )
-                    repo.create(task)
-                }
-            }.onSuccess {
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        isSaved = true
-                    )
-                }
-            }.onFailure { e ->
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        error = e.message ?: "Falha ao salvar."
-                    )
+                    repository.create(task)
                 }
             }
+                .onSuccess {
+                    _uiState.update {
+                        it.copy(isLoading = false, isSaved = true)
+                    }
+                }
+                .onFailure { e ->
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = e.message ?: ERRO_SALVAR_TAREFA
+                        )
+                    }
+                }
         }
     }
+}
 
+/**
+ * Converte o estado do formulário em uma [Task] do domínio.
+ *
+ * Em modo edição, reaproveita o `id` e o `createdAt` originais; em modo
+ * criação, gera um novo `createdAt` e marca a tarefa como não concluída.
+ */
+@RequiresApi(Build.VERSION_CODES.O)
+private fun AddUiState.toDomainTask(): Task {
+    val id = this.id ?: TaskId(0L)
+    val createdAt = this.createdAt ?: Instant.now().toEpochMilli()
+
+    return Task(
+        id = id,
+        title = Title(title.trim()),
+        description = description.ifBlank { null }?.let(::Description),
+        createdAt = Instant.ofEpochMilli(createdAt),
+        isCompleted = if (isEditing) isCompleted else false
+    )
 }
