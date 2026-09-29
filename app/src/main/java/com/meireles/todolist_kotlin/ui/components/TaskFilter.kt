@@ -1,22 +1,39 @@
 package com.meireles.todolist_kotlin.ui.components
 
-/**Enum class representing the three possible filter types used in the UI:
- * ALL, ACTIVE and COMPLETED.
- * */
-enum class TaskFilter { ALL, ACTIVE, COMPLETED }
+/**
+ * Filtros disponíveis para exibição de tarefas na UI.
+ */
+enum class TaskFilter {
+    /** Exibe todas as tarefas. */
+    ALL,
 
-/**Extension function that cycles between the three filters.
- * It is used when the user taps the filter chip in the AppBar.
- * */
+    /** Exibe apenas tarefas em andamento. */
+    ACTIVE,
+
+    /** Exibe apenas tarefas concluídas. */
+    COMPLETED
+}
+
+/**
+ * Cicla entre os três filtros na ordem ALL → ACTIVE → COMPLETED → ALL.
+ *
+ * Usado quando o usuário toca no chip de filtro na barra superior.
+ */
 fun TaskFilter.next(): TaskFilter = when (this) {
     TaskFilter.ALL -> TaskFilter.ACTIVE
     TaskFilter.ACTIVE -> TaskFilter.COMPLETED
     TaskFilter.COMPLETED -> TaskFilter.ALL
 }
 
-/**Function that converts the filter to a Boolean? value used in the repository/DAO, making
- * it easier to use filters in the database.
- * */
+/**
+ * Converte o filtro para o valor booleano esperado pelo repositório/DAO.
+ *
+ * O `null` representa "sem filtro" (todas as tarefas), enquanto `false`
+ * e `true` filtram por tarefas em andamento e concluídas, respectivamente.
+ *
+ * @return `null` para [TaskFilter.ALL], `false` para [TaskFilter.ACTIVE],
+ *   `true` para [TaskFilter.COMPLETED].
+ */
 fun TaskFilter.toBooleanOrNull(): Boolean? = when (this) {
     TaskFilter.ALL -> null
     TaskFilter.ACTIVE -> false
