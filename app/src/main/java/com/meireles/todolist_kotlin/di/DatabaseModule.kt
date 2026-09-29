@@ -13,26 +13,39 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 /**
- * Dependency injection module (Hilt) responsible for providing instances related to the
- * application's Room Database.
- * */
+ * Módulo Hilt responsável por prover as instâncias relacionadas ao banco
+ * de dados Room do aplicativo.
+ *
+ * As dependências são registradas no [SingletonComponent], garantindo que
+ * exista uma única instância de [AppDatabase] durante todo o ciclo de vida
+ * da aplicação.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
-    /**Provides an AppDatabase instance for the injection graph.*/
-    @Provides @Singleton
+
+    /**
+     * Provê a instância única de [AppDatabase] usada pelo app.
+     *
+     * Optamos por **não** usar migração destrutiva: se a versão do schema
+     * for incrementada sem uma migração correspondente, uma exceção será
+     * lançada em vez de apagar os dados do usuário silenciosamente.
+     */
+    @Provides
+    @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
         Room.databaseBuilder(
-            context,                            // Necessary context to create/open database
-            AppDatabase::class.java,     // Abstract class that represents the database
-            TODO_DATABASE_NAME                  // Database file name
+            context,
+            AppDatabase::class.java,
+            TODO_DATABASE_NAME
         )
-            // If there is a version change without migration, it will throw an exception instead of deleting data.
             .fallbackToDestructiveMigration(false)
-            // Build database instance
             .build()
 
-    /**Provides Task's DAO for the injection graph.*/
+    /**
+     * Provê o [TaskDao] a partir do [AppDatabase] injetado.
+     */
     @Provides
     fun provideTaskDao(db: AppDatabase): TaskDao = db.taskDao()
+
 }
