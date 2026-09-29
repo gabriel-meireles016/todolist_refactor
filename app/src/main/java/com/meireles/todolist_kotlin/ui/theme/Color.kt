@@ -2,20 +2,42 @@ package com.meireles.todolist_kotlin.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
+// Paleta de cores base do Material 3 (light theme)
+//
+// Os nomes seguem a convenção do Material Theme Builder: <Cor><Tom>.
+// Tons mais claros (80) são usados no tema escuro; tons mais escuros (40),
+// no tema claro.
+
+/** Cor primária do tema escuro. */
 val Purple80 = Color(0xFFD0BCFF)
+
+/** Cor secundária (cinza-arroxeada) do tema escuro. */
 val PurpleGrey80 = Color(0xFFCCC2DC)
+
+/** Cor terciária (rosa) do tema escuro. */
 val Pink80 = Color(0xFFEFB8C8)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
+/** Cor primária do tema claro. */
+val Purple40 = Color(0xFF6650A4)
+
+/** Cor secundária (cinza-arroxeada) do tema claro. */
+val PurpleGrey40 = Color(0xFF625B71)
+
+/** Cor terciária (rosa) do tema claro. */
 val Pink40 = Color(0xFF7D5260)
 
-val white = Color(0xFFFFFFFF)
+// ---------------------------------------------------------------------------
+// Cores adicionais do app
+// ---------------------------------------------------------------------------
 
-val deepPurple50 = Color(0xFFEDE7F6)
+/** Cor de superfície branca. */
+val White = Color(0xFFFFFFFF)
 
-val deepPurple400 = Color(0XFF7E57C2)
+/** Tom claro de roxo usado como cor de destaque. */
+val DeepPurple50 = Color(0xFFEDE7F6)
 
-val deepPurple500 = Color(0xFF673AB7)
+/** Tom médio de roxo usado como cor de destaque. */
+val DeepPurple400 = Color(0xFF7E57C2)
 
-val deepPurple600 = Color(0xFF5E35B1)
+/** Tom escuro de roxo usado como cor de destaque. */
+val DeepPurple500 = Color(0xFF673AB7)
