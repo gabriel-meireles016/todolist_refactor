@@ -2,29 +2,31 @@ package com.meireles.todolist_kotlin.navigation
 
 import kotlinx.serialization.Serializable
 
-// Creating UI route references, centralizing them here and with a specific type.
-
 /**
- * Define type-safe UI routes for the App.
+ * Define as rotas de navegação do app com **type safety**.
  *
- * Each destination is represented by a sealed type, enabling exhaustive 'when'
- * expressions and centralized route management.
+ * Cada destino é representado por um subtipo do sealed interface, o que
+ * permite expressões `when` exaustivas e centraliza o gerenciamento de rotas.
  *
- * The '@Serializable' annotation allows safe argument passing via JSON, avoiding fragile string
- * concatenations.
- * */
+ * A anotação `@Serializable` permite a passagem segura de argumentos via JSON,
+ * evitando concatenações frágeis de strings.
+ */
 @Serializable
 sealed interface UIRoute{
 
-    /**Home screen.*/
+    /** Tela inicial. */
     @Serializable
     data object Home: UIRoute
 
-    /**Add-Task screen.*/
+    /** Tela de adição de tarefa. */
     @Serializable
     data object Add: UIRoute
 
-    /**Edit-Task screen, requires a task identifier.*/
+    /**
+     * Tela de edição de tarefa.
+     *
+     * @property taskId identificador da tarefa a ser editada.
+     */
     @Serializable
     data class Edit(val taskId: Int): UIRoute
 
