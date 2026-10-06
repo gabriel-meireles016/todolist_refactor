@@ -24,14 +24,15 @@ fun BackButton(onBackClick: () -> Unit = {}) {
     IconButton(
         modifier = Modifier.padding(all = PADDING_BOTAO_VOLTAR),
         onClick = onBackClick,
-        colors = IconButtonDefaults.iconButtonColors(
-            contentColor = MaterialTheme.colorScheme.onPrimary,
-            containerColor = MaterialTheme.colorScheme.primary
-        )
+        colors =
+            IconButtonDefaults.iconButtonColors(
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                containerColor = MaterialTheme.colorScheme.primary,
+            ),
     ) {
         Icon(
             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = "Voltar"
+            contentDescription = "Voltar",
         )
     }
 }

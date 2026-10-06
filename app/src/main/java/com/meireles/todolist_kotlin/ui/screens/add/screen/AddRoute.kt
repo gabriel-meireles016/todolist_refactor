@@ -24,7 +24,7 @@ import com.meireles.todolist_kotlin.ui.screens.add.AddViewModel
 fun AddRoute(
     onSavedNavigateBack: () -> Unit,
     onBackClick: () -> Unit,
-    viewModel: AddViewModel = hiltViewModel()
+    viewModel: AddViewModel = hiltViewModel(),
 ) {
     val state = viewModel.uiState.collectAsStateWithLifecycle().value
 
@@ -37,6 +37,6 @@ fun AddRoute(
         onTitleChange = viewModel::onTitleChange,
         onDescriptionChange = viewModel::onDescriptionChange,
         onSave = viewModel::save,
-        onBackClick = onBackClick
+        onBackClick = onBackClick,
     )
 }

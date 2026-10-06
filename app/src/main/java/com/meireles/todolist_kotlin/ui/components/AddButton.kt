@@ -58,33 +58,33 @@ private const val LABEL_ANIMACAO_ROTACAO = "fabRotation"
 @Composable
 fun AddButton(
     onSearch: () -> Unit = {},
-    goAdd: () -> Unit = {}
+    goAdd: () -> Unit = {},
 ) {
     var expanded by remember { mutableStateOf(false) }
 
     val rotation by animateFloatAsState(
         targetValue = if (expanded) ANGULO_ROTACAO_ABERTO else 0f,
-        label = LABEL_ANIMACAO_ROTACAO
+        label = LABEL_ANIMACAO_ROTACAO,
     )
 
     Box(contentAlignment = Alignment.BottomEnd) {
         // Área invisível que fecha o menu ao clicar fora.
         AnimatedVisibility(visible = expanded) {
             Box(
-                modifier = Modifier
-                    .clickable { expanded = false }
+                modifier =
+                    Modifier
+                        .clickable { expanded = false },
             )
         }
 
         Column(
             horizontalAlignment = Alignment.End,
-            verticalArrangement = Arrangement.spacedBy(ESPACAMENTO_ENTRE_FABS)
+            verticalArrangement = Arrangement.spacedBy(ESPACAMENTO_ENTRE_FABS),
         ) {
-
             AnimatedVisibility(visible = expanded) {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(ESPACAMENTO_ENTRE_FABS),
-                    horizontalAlignment = Alignment.End
+                    horizontalAlignment = Alignment.End,
                 ) {
                     LabeledSmallFab(
                         label = "Adicionar",
@@ -94,18 +94,18 @@ fun AddButton(
                         onClick = {
                             expanded = false
                             goAdd()
-                        }
+                        },
                     )
 
                     LabeledSmallFab(
                         label = "Buscar",
                         icon = {
-                            Icon(imageVector = Icons.Outlined.Search,contentDescription = null)
+                            Icon(imageVector = Icons.Outlined.Search, contentDescription = null)
                         },
                         onClick = {
                             onSearch()
                             expanded = false
-                        }
+                        },
                     )
                 }
             }
@@ -114,13 +114,12 @@ fun AddButton(
                 onClick = { expanded = !expanded },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
-                shape = CircleShape
-
+                shape = CircleShape,
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = null,
-                    modifier = Modifier.rotate(rotation)
+                    modifier = Modifier.rotate(rotation),
                 )
             }
         }
@@ -138,25 +137,25 @@ fun AddButton(
 fun LabeledSmallFab(
     label: String,
     icon: @Composable () -> Unit,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(ESPACAMENTO_ROTULO_FAB)
+        horizontalArrangement = Arrangement.spacedBy(ESPACAMENTO_ROTULO_FAB),
     ) {
         Text(
             text = label,
             color = MaterialTheme.colorScheme.onPrimary,
             style = MaterialTheme.typography.labelLarge,
-            modifier = Modifier
-                .background(
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = CircleShape
-                )
-                .padding(
-                    horizontal = PADDING_ROTULO_HORIZONTAL,
-                    vertical = PADDING_ROTULO_VERTICAL
-                )
+            modifier =
+                Modifier
+                    .background(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = CircleShape,
+                    ).padding(
+                        horizontal = PADDING_ROTULO_HORIZONTAL,
+                        vertical = PADDING_ROTULO_VERTICAL,
+                    ),
         )
 
         FloatingActionButton(

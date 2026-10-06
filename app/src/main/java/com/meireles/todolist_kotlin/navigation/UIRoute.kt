@@ -12,15 +12,14 @@ import kotlinx.serialization.Serializable
  * evitando concatenações frágeis de strings.
  */
 @Serializable
-sealed interface UIRoute{
-
+sealed interface UIRoute {
     /** Tela inicial. */
     @Serializable
-    data object Home: UIRoute
+    data object Home : UIRoute
 
     /** Tela de adição de tarefa. */
     @Serializable
-    data object Add: UIRoute
+    data object Add : UIRoute
 
     /**
      * Tela de edição de tarefa.
@@ -28,6 +27,7 @@ sealed interface UIRoute{
      * @property taskId identificador da tarefa a ser editada.
      */
     @Serializable
-    data class Edit(val taskId: Int): UIRoute
-
+    data class Edit(
+        val taskId: Int,
+    ) : UIRoute
 }

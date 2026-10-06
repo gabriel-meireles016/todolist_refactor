@@ -110,18 +110,18 @@ fun HomeScreen(
     state: HomeUiState,
     onToggleComplete: (TaskId) -> Unit,
     onDelete: (TaskId) -> Unit,
-    onFilterChange: (Boolean?) -> Unit
+    onFilterChange: (Boolean?) -> Unit,
 ) {
-
     var showSheet by remember { mutableStateOf(false) }
     var selectedId by remember { mutableStateOf(TaskId(ID_NENHUM_SELECIONADO.toLong())) }
     var searchVisible by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf(TextFieldValue("")) }
 
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true,
-        confirmValueChange = { it != SheetValue.PartiallyExpanded }
-    )
+    val sheetState =
+        rememberModalBottomSheetState(
+            skipPartiallyExpanded = true,
+            confirmValueChange = { it != SheetValue.PartiallyExpanded },
+        )
 
     var currentFilter by rememberSaveable { mutableStateOf(TaskFilter.ALL) }
     val cycleFilter: () -> Unit = {
@@ -130,14 +130,14 @@ fun HomeScreen(
     }
 
     LaunchedEffect(state.filterCompleted) {
-        val expected = when (state.filterCompleted) {
-            null -> TaskFilter.ALL
-            false -> TaskFilter.ACTIVE
-            true -> TaskFilter.COMPLETED
-        }
+        val expected =
+            when (state.filterCompleted) {
+                null -> TaskFilter.ALL
+                false -> TaskFilter.ACTIVE
+                true -> TaskFilter.COMPLETED
+            }
         if (currentFilter != expected) currentFilter = expected
     }
-
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -146,31 +146,33 @@ fun HomeScreen(
             AppBarPattern(
                 counts = state.counts,
                 currentFilter = currentFilter,
-                onCycleFilter = cycleFilter
+                onCycleFilter = cycleFilter,
             )
         },
         floatingActionButton = {
             AddButton(
                 goAdd = goAdd,
-                onSearch = { searchVisible = true }
+                onSearch = { searchVisible = true },
             )
-        }
+        },
     ) { innerPadding ->
-        val filteredTasks: List<Task> = remember(state.tasks, searchText.text) {
-            filterTasks(state.tasks, searchText.text)
-        }
+        val filteredTasks: List<Task> =
+            remember(state.tasks, searchText.text) {
+                filterTasks(state.tasks, searchText.text)
+            }
 
         LazyColumn(
-            modifier = Modifier
-                .padding(innerPadding)
-                .padding(vertical = PADDING_LISTA_VERTICAL),
+            modifier =
+                Modifier
+                    .padding(innerPadding)
+                    .padding(vertical = PADDING_LISTA_VERTICAL),
         ) {
             item {
                 SearchBar(
                     visible = searchVisible,
                     query = searchText,
                     onQueryChange = { searchText = it },
-                    onClose = { searchVisible = false }
+                    onClose = { searchVisible = false },
                 )
             }
 
@@ -184,7 +186,7 @@ fun HomeScreen(
                             selectedId = task.id
                             showSheet = true
                         },
-                        onToggle = { onToggleComplete(task.id) }
+                        onToggle = { onToggleComplete(task.id) },
                     )
                 }
             }
@@ -193,7 +195,7 @@ fun HomeScreen(
         if (showSheet) {
             ModalBottomSheet(
                 onDismissRequest = { showSheet = false },
-                sheetState = sheetState
+                sheetState = sheetState,
             ) {
                 ActionsSheet(
                     selectedId = selectedId,
@@ -204,22 +206,24 @@ fun HomeScreen(
                     onDelete = {
                         showSheet = false
                         onDelete(selectedId)
-                    }
+                    },
                 )
             }
         }
-
     }
 }
 
 /** Filtra tarefas pelo texto de busca (título, descrição ou ID). */
-private fun filterTasks(tasks: List<Task>, query: String): List<Task> {
+private fun filterTasks(
+    tasks: List<Task>,
+    query: String,
+): List<Task> {
     if (query.isBlank()) return tasks
     val q = query.trim()
     return tasks.filter { task ->
         task.title.value.contains(q, ignoreCase = true) ||
-                (task.description?.value?.contains(q, ignoreCase = true) == true) ||
-                task.id.value.toString() == q
+            (task.description?.value?.contains(q, ignoreCase = true) == true) ||
+            task.id.value.toString() == q
     }
 }
 
@@ -228,34 +232,35 @@ private fun SearchBar(
     visible: Boolean,
     query: TextFieldValue,
     onQueryChange: (TextFieldValue) -> Unit,
-    onClose: () -> Unit
+    onClose: () -> Unit,
 ) {
     AnimatedVisibility(
         visible = visible,
         enter = expandVertically(),
-        exit = shrinkVertically()
+        exit = shrinkVertically(),
     ) {
         OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = PADDING_ITEM_HORIZONTAL),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = PADDING_ITEM_HORIZONTAL),
             value = query,
             label = { Text(text = "Buscar...") },
             onValueChange = onQueryChange,
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Search,
-                    contentDescription = null
+                    contentDescription = null,
                 )
             },
             trailingIcon = {
                 IconButton(onClick = onClose) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Fechar busca"
+                        contentDescription = "Fechar busca",
                     )
                 }
-            }
+            },
         )
     }
 }
@@ -268,67 +273,70 @@ private fun SearchBar(
 private fun TaskCard(
     task: Task,
     onLongPress: () -> Unit,
-    onToggle: () -> Unit
+    onToggle: () -> Unit,
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                horizontal = PADDING_ITEM_HORIZONTAL,
-                vertical = PADDING_ITEM_VERTICAL
-            )
-            .combinedClickable(
-                onClick = {},
-                onLongClick = onLongPress
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = PADDING_ITEM_HORIZONTAL,
+                    vertical = PADDING_ITEM_VERTICAL,
+                ).combinedClickable(
+                    onClick = {},
+                    onLongClick = onLongPress,
+                ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
             ),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = ELEVACAO_CARD)
+        elevation = CardDefaults.cardElevation(defaultElevation = ELEVACAO_CARD),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(all = PADDING_CARD)
+            modifier = Modifier.padding(all = PADDING_CARD),
         ) {
             IconButton(
                 onClick = onToggle,
-                modifier = Modifier.padding(end = ESPACAMENTO_ICONE_CONTEUDO)
+                modifier = Modifier.padding(end = ESPACAMENTO_ICONE_CONTEUDO),
             ) {
                 Icon(
-                    imageVector = if (task.isCompleted) {
-                        Icons.Outlined.CheckCircle
-                    } else {
-                        Icons.Outlined.Circle
-                    },
-                    contentDescription = if (task.isCompleted) {
-                        "Tarefa concluída"
-                    } else {
-                        "Tarefa em andamento"
-                    }
+                    imageVector =
+                        if (task.isCompleted) {
+                            Icons.Outlined.CheckCircle
+                        } else {
+                            Icons.Outlined.Circle
+                        },
+                    contentDescription =
+                        if (task.isCompleted) {
+                            "Tarefa concluída"
+                        } else {
+                            "Tarefa em andamento"
+                        },
                 )
             }
 
             Column {
                 Text(
                     text = task.title.value,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
                 )
 
                 Text(
                     text = "ID: ${task.id.value}",
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
                 )
 
                 task.description?.let {
                     Text(
                         text = "Descrição: ${it.value}",
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
                     )
                 }
 
                 Text(
                     text = "Criado em: ${task.createdAt.formatAsDate()}",
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
                 )
             }
         }
@@ -339,14 +347,15 @@ private fun TaskCard(
 @Composable
 private fun EmptyState(modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(PADDING_ITEM_HORIZONTAL),
-        contentAlignment = Alignment.Center
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(PADDING_ITEM_HORIZONTAL),
+        contentAlignment = Alignment.Center,
     ) {
         Text(
             text = "Nenhuma tarefa encontrada.",
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyMedium,
         )
     }
 }
@@ -358,35 +367,37 @@ private fun EmptyState(modifier: Modifier = Modifier) {
 private fun ActionsSheet(
     selectedId: TaskId,
     onEdit: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                horizontal = PADDING_ITEM_HORIZONTAL,
-                vertical = PADDING_ITEM_VERTICAL
-            )
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = PADDING_ITEM_HORIZONTAL,
+                    vertical = PADDING_ITEM_VERTICAL,
+                ),
     ) {
         Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = PADDING_CARD),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = PADDING_CARD),
             text = "Ações para o item #${selectedId.value}",
             style = MaterialTheme.typography.titleMedium,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
 
         ActionItem(
             label = "Editar",
             icon = Icons.Default.Edit,
-            onClick = onEdit
+            onClick = onEdit,
         )
 
         ActionItem(
             label = "Excluir",
             icon = Icons.Default.Remove,
-            onClick = onDelete
+            onClick = onDelete,
         )
     }
 }
@@ -395,20 +406,22 @@ private fun ActionsSheet(
 private fun ActionItem(
     label: String,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     ListItem(
         headlineContent = { Text(label) },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = PADDING_ITEM_SHEET)
-            .clickable(onClick = onClick),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = PADDING_ITEM_SHEET)
+                .clickable(onClick = onClick),
         leadingContent = {
             Icon(imageVector = icon, contentDescription = null)
         },
-        colors = ListItemDefaults.colors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+        colors =
+            ListItemDefaults.colors(
+                containerColor = MaterialTheme.colorScheme.surface,
+            ),
     )
 }
 

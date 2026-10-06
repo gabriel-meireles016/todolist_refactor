@@ -28,17 +28,23 @@ data class Task(
     val title: Title,
     val description: Description?,
     val createdAt: Instant,
-    val isCompleted: Boolean
+    val isCompleted: Boolean,
 )
 
 /** Identificador único de uma [Task]. */
 @JvmInline
-value class TaskId(val value: Long)
+value class TaskId(
+    val value: Long,
+)
 
 /** Título de uma [Task]. */
 @JvmInline
-value class Title(val value: String)
+value class Title(
+    val value: String,
+)
 
 /** Descrição opcional de uma [Task]. */
 @JvmInline
-value class Description(val value: String)
+value class Description(
+    val value: String,
+)

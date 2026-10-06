@@ -15,19 +15,15 @@ data class TaskEntity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = COLUMN_ID)
     val id: Int = ID_NAO_PERSISTIDO,
-
     @ColumnInfo(name = COLUMN_TITLE)
     val title: String,
-
     @ColumnInfo(name = COLUMN_DESCRIPTION)
     val description: String? = null,
-
     /** Instante de criação em milissegundos desde a epoch (Unix time). */
     @ColumnInfo(name = COLUMN_CREATED_AT)
     val createdAt: Long,
-
     @ColumnInfo(name = COLUMN_IS_COMPLETED)
-    val isCompleted: Boolean = false
+    val isCompleted: Boolean = false,
 ) {
     companion object {
         const val TABLE_NAME = "task"

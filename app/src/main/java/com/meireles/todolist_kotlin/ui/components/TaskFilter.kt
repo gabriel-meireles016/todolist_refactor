@@ -11,7 +11,7 @@ enum class TaskFilter {
     ACTIVE,
 
     /** Exibe apenas tarefas concluídas. */
-    COMPLETED
+    COMPLETED,
 }
 
 /**
@@ -19,11 +19,12 @@ enum class TaskFilter {
  *
  * Usado quando o usuário toca no chip de filtro na barra superior.
  */
-fun TaskFilter.next(): TaskFilter = when (this) {
-    TaskFilter.ALL -> TaskFilter.ACTIVE
-    TaskFilter.ACTIVE -> TaskFilter.COMPLETED
-    TaskFilter.COMPLETED -> TaskFilter.ALL
-}
+fun TaskFilter.next(): TaskFilter =
+    when (this) {
+        TaskFilter.ALL -> TaskFilter.ACTIVE
+        TaskFilter.ACTIVE -> TaskFilter.COMPLETED
+        TaskFilter.COMPLETED -> TaskFilter.ALL
+    }
 
 /**
  * Converte o filtro para o valor booleano esperado pelo repositório/DAO.
@@ -34,8 +35,9 @@ fun TaskFilter.next(): TaskFilter = when (this) {
  * @return `null` para [TaskFilter.ALL], `false` para [TaskFilter.ACTIVE],
  *   `true` para [TaskFilter.COMPLETED].
  */
-fun TaskFilter.toBooleanOrNull(): Boolean? = when (this) {
-    TaskFilter.ALL -> null
-    TaskFilter.ACTIVE -> false
-    TaskFilter.COMPLETED -> true
-}
+fun TaskFilter.toBooleanOrNull(): Boolean? =
+    when (this) {
+        TaskFilter.ALL -> null
+        TaskFilter.ACTIVE -> false
+        TaskFilter.COMPLETED -> true
+    }

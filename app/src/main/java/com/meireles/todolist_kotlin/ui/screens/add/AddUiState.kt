@@ -29,5 +29,5 @@ data class AddUiState(
     val isCompleted: Boolean = false,
     val isValid: Boolean = false,
     val error: String? = null,
-    val isSaved: Boolean = false
+    val isSaved: Boolean = false,
 )

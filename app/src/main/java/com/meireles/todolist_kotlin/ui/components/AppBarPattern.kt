@@ -56,20 +56,21 @@ fun AppBarPattern(
     counts: TaskCounts? = null,
     currentFilter: TaskFilter = TaskFilter.ALL,
     onCycleFilter: () -> Unit = {},
-    title: String = "TO DO LIST KOTLIN"
+    title: String = "TO DO LIST KOTLIN",
 ) {
-
-    val (label, value) = when (currentFilter) {
-        TaskFilter.ALL -> "Total" to (counts?.total ?: 0)
-        TaskFilter.ACTIVE -> "Ativos" to (counts?.inProgress ?: 0)
-        TaskFilter.COMPLETED -> "Concluídos" to (counts?.completed ?: 0)
-    }
+    val (label, value) =
+        when (currentFilter) {
+            TaskFilter.ALL -> "Total" to (counts?.total ?: 0)
+            TaskFilter.ACTIVE -> "Ativos" to (counts?.inProgress ?: 0)
+            TaskFilter.COMPLETED -> "Concluídos" to (counts?.completed ?: 0)
+        }
 
     CenterAlignedTopAppBar(
-        colors = topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = MaterialTheme.colorScheme.onPrimary
-        ),
+        colors =
+            topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                titleContentColor = MaterialTheme.colorScheme.onPrimary,
+            ),
         title = {
             Text(title)
         },
@@ -83,10 +84,10 @@ fun AppBarPattern(
                 FiltroChip(
                     label = label,
                     value = value,
-                    onClick = onCycleFilter
+                    onClick = onCycleFilter,
                 )
             }
-        }
+        },
     )
 }
 
@@ -101,44 +102,44 @@ fun AppBarPattern(
 private fun FiltroChip(
     label: String,
     value: Int,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Box(
-        modifier = Modifier
-            .background(
-                color = MaterialTheme.colorScheme.primaryContainer,
-                shape = CircleShape
-            )
-            .padding(PADDING_CHIP)
-            .width(LARGURA_CHIP_FILTRO)
-            .clickable(onClick = onClick)
+        modifier =
+            Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    shape = CircleShape,
+                ).padding(PADDING_CHIP)
+                .width(LARGURA_CHIP_FILTRO)
+                .clickable(onClick = onClick),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceAround
+            horizontalArrangement = Arrangement.SpaceAround,
         ) {
             Text(
                 text = label,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(start = PADDING_ROTULO_FILTRO)
+                modifier = Modifier.padding(start = PADDING_ROTULO_FILTRO),
             )
             Box(
-                modifier = Modifier
-                    .background(
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = CircleShape
-                    )
-                    .padding(PADDING_CONTADOR)
-                    .size(TAMANHO_CIRCULO_CONTADOR)
+                modifier =
+                    Modifier
+                        .background(
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = CircleShape,
+                        ).padding(PADDING_CONTADOR)
+                        .size(TAMANHO_CIRCULO_CONTADOR),
             ) {
                 Text(
                     text = value.toString(),
                     color = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
                 )
             }
         }

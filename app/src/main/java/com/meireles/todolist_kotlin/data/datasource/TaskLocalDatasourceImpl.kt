@@ -13,32 +13,28 @@ import javax.inject.Inject
  * ao [TaskDao], mas expõe apenas o contrato [TaskLocalDatasource] para o
  * restante do sistema. O [TaskDao] é injetado via Hilt.
  */
-class TaskLocalDatasourceImpl @Inject constructor(
-    private val taskDao: TaskDao
-) : TaskLocalDatasource {
+class TaskLocalDatasourceImpl
+    @Inject
+    constructor(
+        private val taskDao: TaskDao,
+    ) : TaskLocalDatasource {
+        override suspend fun create(taskEntity: TaskEntity): Long = taskDao.create(taskEntity)
 
-    override suspend fun create(taskEntity: TaskEntity) : Long =
-        taskDao.create(taskEntity)
+        override fun getAll(isCompleted: Boolean?): Flow<List<TaskEntity>> = taskDao.getAll(isCompleted)
 
-    override fun getAll(isCompleted: Boolean?): Flow<List<TaskEntity>> =
-        taskDao.getAll(isCompleted)
+        override suspend fun delete(id: Int) {
+            taskDao.delete(id)
+        }
 
-    override suspend fun delete(id: Int) {
-        taskDao.delete(id)
+        override suspend fun update(taskEntity: TaskEntity) {
+            taskDao.update(taskEntity)
+        }
+
+        override fun getById(id: Int): Flow<TaskEntity?> = taskDao.getById(id)
+
+        override suspend fun toggleStatus(id: Int) {
+            taskDao.toggleStatus(id)
+        }
+
+        override fun getCounts(): Flow<TaskCounts> = taskDao.getCounts()
     }
-
-    override suspend fun update(taskEntity: TaskEntity) {
-        taskDao.update(taskEntity)
-    }
-
-    override fun getById(id: Int): Flow<TaskEntity?> =
-        taskDao.getById(id)
-
-    override suspend fun toggleStatus(id: Int) {
-        taskDao.toggleStatus(id)
-    }
-
-    override fun getCounts(): Flow<TaskCounts> =
-        taskDao.getCounts()
-
-}

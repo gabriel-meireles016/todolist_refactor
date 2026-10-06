@@ -23,26 +23,26 @@ fun MainNavHost() {
 
     NavHost(
         navController = navController,
-        startDestination = UIRoute.Home
+        startDestination = UIRoute.Home,
     ) {
         composable<UIRoute.Home> {
             HomeRoute(
                 goAdd = { navController.navigate(UIRoute.Add) },
-                goEdit = { id -> navController.navigate(UIRoute.Edit(id.value.toInt())) }
+                goEdit = { id -> navController.navigate(UIRoute.Edit(id.value.toInt())) },
             )
         }
 
         composable<UIRoute.Add> {
             AddRoute(
                 onSavedNavigateBack = { navController.popBackStack() },
-                onBackClick = { navController.popBackStack() }
+                onBackClick = { navController.popBackStack() },
             )
         }
 
         composable<UIRoute.Edit> {
             AddRoute(
                 onSavedNavigateBack = { navController.popBackStack() },
-                onBackClick = { navController.popBackStack() }
+                onBackClick = { navController.popBackStack() },
             )
         }
     }

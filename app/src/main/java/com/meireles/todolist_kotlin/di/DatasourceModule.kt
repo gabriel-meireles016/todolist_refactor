@@ -19,15 +19,11 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class DatasourceModule {
-
     /**
      * Informa ao Hilt que, quando alguém solicitar [TaskLocalDatasource],
      * deve injetar uma instância de [TaskLocalDatasourceImpl].
      */
     @Binds
     @Singleton
-    abstract fun bindTaskLocalDatasource(
-        impl: TaskLocalDatasourceImpl
-    ): TaskLocalDatasource
-
+    abstract fun bindTaskLocalDatasource(impl: TaskLocalDatasourceImpl): TaskLocalDatasource
 }
