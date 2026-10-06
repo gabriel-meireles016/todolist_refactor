@@ -3,17 +3,6 @@ package com.meireles.todolist_kotlin.domain.model
 import java.time.Instant
 
 /**
- * Glossário da linguagem ubíqua do sistema To-Do List:
- *
- *  - Tarefa (Task)      : item a ser realizado pelo usuário.
- *  - Título (Title)     : resumo curto e obrigatório da tarefa.
- *  - Descrição          : detalhamento opcional da tarefa.
- *  - Concluída          : estado final de uma tarefa finalizada pelo usuário.
- *  - Identificador      : chave única de uma tarefa no sistema.
- *  - Criada em          : instante em que a tarefa foi registrada.
- */
-
-/**
  * Representa uma tarefa no domínio da aplicação.
  * Independente de banco de dados e de frameworks.
  *
