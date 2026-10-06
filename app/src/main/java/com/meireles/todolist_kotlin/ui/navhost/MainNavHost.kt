@@ -1,4 +1,4 @@
-package com.meireles.todolist_kotlin.ui.nav_host
+package com.meireles.todolist_kotlin.ui.navhost
 
 import android.os.Build
 import androidx.annotation.RequiresApi
