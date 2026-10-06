@@ -6,7 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
-import com.meireles.todolist_kotlin.ui.nav_host.MainNavHost
+import com.meireles.todolist_kotlin.ui.navhost.MainNavHost
 import com.meireles.todolist_kotlin.ui.theme.TodolistKotlinTheme
 import dagger.hilt.android.AndroidEntryPoint
 
