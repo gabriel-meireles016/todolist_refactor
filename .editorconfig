@@ -1,2 +1,13 @@
+# .editorconfig - configuração do ktlint para o projeto
+
+root = true
+
 [*.{kt,kts}]
+# Segue o guia de estilo oficial do Kotlin
+ktlint_code_style = ktlint_official
+
+# Permite PascalCase em funções @Composable (convenção do Jetpack Compose)
 ktlint_function_naming_ignore_when_annotated_with = Composable
+
+# Tamanho máximo de linha (padrão do Android é 100)
+max_line_length = 100
