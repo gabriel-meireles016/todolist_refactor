@@ -5,6 +5,7 @@ plugins {
     id("androidx.room")
     id("com.google.dagger.hilt.android")
     alias(libs.plugins.kotlin.serialization)
+    id("org.jlleitschuh.gradle.ktlint")
 }
 
 android {
