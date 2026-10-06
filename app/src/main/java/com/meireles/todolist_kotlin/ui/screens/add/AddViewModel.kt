@@ -44,7 +44,8 @@ class AddViewModel
         private val repository: TaskRepository,
         savedStateHandle: SavedStateHandle,
     ) : ViewModel() {
-        private val taskId: TaskId? = savedStateHandle.get<Int>(ARG_TASK_ID)?.let { TaskId(it.toLong()) }
+        private val taskId: TaskId? =
+            savedStateHandle.get<Int>(ARG_TASK_ID)?.let { TaskId(it.toLong()) }
 
         private val _uiState =
             MutableStateFlow(

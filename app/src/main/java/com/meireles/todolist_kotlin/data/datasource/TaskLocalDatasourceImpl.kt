@@ -13,6 +13,7 @@ import javax.inject.Inject
  * ao [TaskDao], mas expõe apenas o contrato [TaskLocalDatasource] para o
  * restante do sistema. O [TaskDao] é injetado via Hilt.
  */
+
 class TaskLocalDatasourceImpl
     @Inject
     constructor(
@@ -20,7 +21,8 @@ class TaskLocalDatasourceImpl
     ) : TaskLocalDatasource {
         override suspend fun create(taskEntity: TaskEntity): Long = taskDao.create(taskEntity)
 
-        override fun getAll(isCompleted: Boolean?): Flow<List<TaskEntity>> = taskDao.getAll(isCompleted)
+        override fun getAll(isCompleted: Boolean?): Flow<List<TaskEntity>> =
+            taskDao.getAll(isCompleted)
 
         override suspend fun delete(id: Int) {
             taskDao.delete(id)

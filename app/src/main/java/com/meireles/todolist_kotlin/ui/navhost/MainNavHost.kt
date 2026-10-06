@@ -28,7 +28,13 @@ fun MainNavHost() {
         composable<UIRoute.Home> {
             HomeRoute(
                 goAdd = { navController.navigate(UIRoute.Add) },
-                goEdit = { id -> navController.navigate(UIRoute.Edit(id.value.toInt())) },
+                goEdit = { id ->
+                    navController.navigate(
+                        UIRoute.Edit(
+                            id.value.toInt(),
+                        ),
+                    )
+                },
             )
         }
 

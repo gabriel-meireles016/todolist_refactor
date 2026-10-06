@@ -113,9 +113,11 @@ fun HomeScreen(
     onFilterChange: (Boolean?) -> Unit,
 ) {
     var showSheet by remember { mutableStateOf(false) }
-    var selectedId by remember { mutableStateOf(TaskId(ID_NENHUM_SELECIONADO.toLong())) }
     var searchVisible by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf(TextFieldValue("")) }
+    var selectedId by remember {
+        mutableStateOf(TaskId(ID_NENHUM_SELECIONADO.toLong()))
+    }
 
     val sheetState =
         rememberModalBottomSheetState(
