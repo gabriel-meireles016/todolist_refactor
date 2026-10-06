@@ -6,4 +6,5 @@ plugins {
     id("androidx.room") version "2.8.4" apply false
     id("com.google.dagger.hilt.android") version "2.59.2" apply false
     alias(libs.plugins.kotlin.serialization) apply false
+    id("org.jlleitschuh.gradle.ktlint") version "14.2.0" apply false
 }
