@@ -11,5 +11,5 @@ package com.meireles.todolist_kotlin.data.repositories
 data class TaskCounts(
     val total: Int,
     val completed: Int,
-    val inProgress: Int
+    val inProgress: Int,
 )

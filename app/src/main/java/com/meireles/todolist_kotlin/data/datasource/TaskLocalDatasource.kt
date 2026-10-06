@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.Flow
  * desta interface precisam ser atualizadas.
  */
 interface TaskLocalDatasource {
-
     /**
      * Cria uma nova tarefa no armazenamento local.
      *
@@ -56,5 +55,4 @@ interface TaskLocalDatasource {
      * Retorna um fluxo reativo com as contagens de tarefas por estado.
      */
     fun getCounts(): Flow<TaskCounts>
-
 }

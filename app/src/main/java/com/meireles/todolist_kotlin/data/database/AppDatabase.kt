@@ -19,10 +19,9 @@ private const val DATABASE_VERSION = 1
 @Database(
     entities = [TaskEntity::class],
     version = DATABASE_VERSION,
-    exportSchema = true
+    exportSchema = true,
 )
-abstract class AppDatabase: RoomDatabase() {
-
+abstract class AppDatabase : RoomDatabase() {
     /** Retorna o DAO responsável pelo acesso à tabela de tarefas. */
     abstract fun taskDao(): TaskDao
 }

@@ -16,13 +16,14 @@ import java.time.Instant
  * para [Instant] (formato do domínio).
  */
 @RequiresApi(Build.VERSION_CODES.O)
-fun TaskEntity.toDomain(): Task = Task(
-    id = TaskId(id.toLong()),
-    title = Title(title),
-    description = description?.let(::Description),
-    createdAt = Instant.ofEpochMilli(createdAt),
-    isCompleted = isCompleted
-)
+fun TaskEntity.toDomain(): Task =
+    Task(
+        id = TaskId(id.toLong()),
+        title = Title(title),
+        description = description?.let(::Description),
+        createdAt = Instant.ofEpochMilli(createdAt),
+        isCompleted = isCompleted,
+    )
 
 /**
  * Converte o modelo de domínio [Task] para a entidade de persistência [TaskEntity].
@@ -31,10 +32,11 @@ fun TaskEntity.toDomain(): Task = Task(
  * (formato aceito pelo Room).
  */
 @RequiresApi(Build.VERSION_CODES.O)
-fun Task.toEntity(): TaskEntity = TaskEntity(
-    id = id.value.toInt(),
-    title = title.value,
-    description = description?.value,
-    createdAt = createdAt.toEpochMilli(),
-    isCompleted = isCompleted
-)
+fun Task.toEntity(): TaskEntity =
+    TaskEntity(
+        id = id.value.toInt(),
+        title = title.value,
+        description = description?.value,
+        createdAt = createdAt.toEpochMilli(),
+        isCompleted = isCompleted,
+    )

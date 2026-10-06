@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.Flow
  * detalhes de persistência (banco, cache, rede).
  */
 interface TaskRepository {
-
     /**
      * Cria uma nova [Task] e retorna o identificador gerado.
      *
@@ -23,7 +22,7 @@ interface TaskRepository {
      *   pelo valor gerado pela camada de persistência.
      * @return o [TaskId] atribuído à tarefa criada.
      */
-    suspend fun create(task: Task) : TaskId
+    suspend fun create(task: Task): TaskId
 
     /**
      * Retorna um fluxo reativo de tarefas, opcionalmente filtradas por status.
@@ -57,5 +56,4 @@ interface TaskRepository {
      * Retorna um fluxo reativo com as contagens de tarefas por estado.
      */
     fun getCounts(): Flow<TaskCounts>
-
 }

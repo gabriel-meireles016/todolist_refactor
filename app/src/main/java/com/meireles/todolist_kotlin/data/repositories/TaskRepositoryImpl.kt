@@ -27,39 +27,37 @@ import javax.inject.Inject
  * Isso mantém a camada de apresentação desacoplada dos detalhes de persistência.
  */
 @RequiresApi(Build.VERSION_CODES.O)
-class TaskRepositoryImpl @Inject constructor(
-    private val local: TaskLocalDatasource
-) : TaskRepository {
-
-    override suspend fun create(task: Task) : TaskId {
-        val generatedId = local.create(task.toEntity())
-        return TaskId(generatedId)
-    }
-
-    override fun getAll(isCompleted: Boolean?): Flow<List<Task>> =
-        local.getAll(isCompleted).map { entities ->
-            entities.map { it.toDomain() }
+class TaskRepositoryImpl
+    @Inject
+    constructor(
+        private val local: TaskLocalDatasource,
+    ) : TaskRepository {
+        override suspend fun create(task: Task): TaskId {
+            val generatedId = local.create(task.toEntity())
+            return TaskId(generatedId)
         }
 
-    override suspend fun delete(id: TaskId) {
-        local.delete(id.value.toInt())
-    }
+        override fun getAll(isCompleted: Boolean?): Flow<List<Task>> =
+            local.getAll(isCompleted).map { entities ->
+                entities.map { it.toDomain() }
+            }
 
-
-    override suspend fun update(task: Task) {
-        local.update(task.toEntity())
-    }
-
-    override fun getById(id: TaskId): Flow<Task?> =
-        local.getById(id.value.toInt()).map { entity ->
-            entity?.toDomain()
+        override suspend fun delete(id: TaskId) {
+            local.delete(id.value.toInt())
         }
 
-    override suspend fun toggleStatus(id: TaskId) {
-        local.toggleStatus(id.value.toInt())
+        override suspend fun update(task: Task) {
+            local.update(task.toEntity())
+        }
+
+        override fun getById(id: TaskId): Flow<Task?> =
+            local.getById(id.value.toInt()).map { entity ->
+                entity?.toDomain()
+            }
+
+        override suspend fun toggleStatus(id: TaskId) {
+            local.toggleStatus(id.value.toInt())
+        }
+
+        override fun getCounts(): Flow<TaskCounts> = local.getCounts()
     }
-
-    override fun getCounts(): Flow<TaskCounts> =
-        local.getCounts()
-
-}

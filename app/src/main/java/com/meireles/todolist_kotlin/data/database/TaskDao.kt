@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.Flow
  */
 @Dao
 interface TaskDao {
-
     /**
      * Insere uma nova tarefa e retorna o `rowId` gerado pelo SQLite.
      */
@@ -34,7 +33,7 @@ interface TaskDao {
             SELECT * FROM ${TaskEntity.TABLE_NAME}
             WHERE (:isCompleted IS NULL OR ${TaskEntity.COLUMN_IS_COMPLETED} = :isCompleted)
             ORDER BY ${TaskEntity.COLUMN_ID}
-            """
+            """,
     )
     fun getAll(isCompleted: Boolean?): Flow<List<TaskEntity>>
 
@@ -59,7 +58,7 @@ interface TaskDao {
             SELECT * FROM ${TaskEntity.TABLE_NAME}
             WHERE ${TaskEntity.COLUMN_ID} = :id
             LIMIT 1
-            """
+            """,
     )
     fun getById(id: Int): Flow<TaskEntity?>
 
@@ -72,7 +71,7 @@ interface TaskDao {
             UPDATE ${TaskEntity.TABLE_NAME}
             SET ${TaskEntity.COLUMN_IS_COMPLETED} = NOT ${TaskEntity.COLUMN_IS_COMPLETED}
             WHERE ${TaskEntity.COLUMN_ID} = :id
-            """
+            """,
     )
     suspend fun toggleStatus(id: Int)
 
@@ -89,8 +88,7 @@ interface TaskDao {
                 COALESCE(SUM(CASE WHEN ${TaskEntity.COLUMN_IS_COMPLETED} = 0 THEN 1 ELSE 0 END),0)
                     AS inProgress
             FROM ${TaskEntity.TABLE_NAME}
-            """
+            """,
     )
     fun getCounts(): Flow<TaskCounts>
-
 }

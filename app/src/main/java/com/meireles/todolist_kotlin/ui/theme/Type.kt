@@ -12,12 +12,14 @@ import androidx.compose.ui.unit.sp
  * Por padrão, apenas `bodyLarge` é personalizado; os demais estilos
  * herdam os valores do Material Theme.
  */
-val Typography = Typography(
-    bodyLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.5.sp
+val Typography =
+    Typography(
+        bodyLarge =
+            TextStyle(
+                fontFamily = FontFamily.Default,
+                fontWeight = FontWeight.Normal,
+                fontSize = 16.sp,
+                lineHeight = 24.sp,
+                letterSpacing = 0.5.sp,
+            ),
     )
-)

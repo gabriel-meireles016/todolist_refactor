@@ -23,7 +23,7 @@ import com.meireles.todolist_kotlin.ui.screens.home.HomeViewModel
 fun HomeRoute(
     goAdd: () -> Unit,
     goEdit: (TaskId) -> Unit,
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
 

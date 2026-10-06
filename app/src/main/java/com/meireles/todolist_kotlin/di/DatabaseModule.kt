@@ -23,7 +23,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
-
     /**
      * Provê a instância única de [AppDatabase] usada pelo app.
      *
@@ -33,13 +32,15 @@ object DatabaseModule {
      */
     @Provides
     @Singleton
-    fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
-        Room.databaseBuilder(
-            context,
-            AppDatabase::class.java,
-            TODO_DATABASE_NAME
-        )
-            .fallbackToDestructiveMigration(false)
+    fun provideDatabase(
+        @ApplicationContext context: Context,
+    ): AppDatabase =
+        Room
+            .databaseBuilder(
+                context,
+                AppDatabase::class.java,
+                TODO_DATABASE_NAME,
+            ).fallbackToDestructiveMigration(false)
             .build()
 
     /**
@@ -47,5 +48,4 @@ object DatabaseModule {
      */
     @Provides
     fun provideTaskDao(db: AppDatabase): TaskDao = db.taskDao()
-
 }
