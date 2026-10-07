@@ -1,6 +1,6 @@
-package com.meireles.todolist_kotlin
+package com.meireles.todolist
 
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 /**
