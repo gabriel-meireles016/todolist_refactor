@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "todolist_kotlin"
+rootProject.name = "todolist"
 include(":app")

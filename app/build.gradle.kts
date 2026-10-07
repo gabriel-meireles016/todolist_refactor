@@ -9,13 +9,13 @@ plugins {
 }
 
 android {
-    namespace = "com.meireles.todolist_kotlin"
+    namespace = "com.meireles.todolist"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "com.meireles.todolist_kotlin"
+        applicationId = "com.meireles.todolist"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
