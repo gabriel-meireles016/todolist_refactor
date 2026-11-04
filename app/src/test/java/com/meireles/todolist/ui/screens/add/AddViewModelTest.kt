@@ -7,12 +7,14 @@ import com.meireles.todolist.domain.model.Task
 import com.meireles.todolist.domain.model.TaskId
 import com.meireles.todolist.domain.model.Title
 import com.meireles.todolist.domain.repositories.TaskRepository
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -276,6 +278,49 @@ class AddViewModelTest {
         assertTrue(repository.tasks.value.single().isCompleted)
     }
 
+    // --- Combate aos Mutantes ---
+
+    @Test
+    fun `save define isLoading true durante a operacao`() = runTest(dispatcher) {
+        val gate = CompletableDeferred<Unit>()
+        repository.gateOnCreate = gate
+
+        val vm = AddViewModel(repository, savedStateHandle)
+        vm.onTitleChange("Tarefa")
+        vm.save()
+        dispatcher.scheduler.advanceUntilIdle() // launch roda até o await do gate
+
+        assertTrue(vm.uiState.value.isLoading)
+
+        gate.complete(Unit)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertFalse(vm.uiState.value.isLoading)
+        assertTrue(vm.uiState.value.isSaved)
+    }
+
+    @Test
+    fun `estado inicial em modo criacao tem isCompleted falso`() {
+        val vm = AddViewModel(repository, savedStateHandle)
+        assertFalse(vm.uiState.value.isCompleted)
+    }
+
+    @Test
+    fun `estado inicial em modo edicao tem isLoading true antes de carregar`() = runTest(dispatcher) {
+        val gate = CompletableDeferred<Unit>()
+        repository.gateOnGetById = gate
+
+        val handle = SavedStateHandle(mapOf("taskId" to 1))
+        val vm = AddViewModel(repository, handle)
+
+        // o load está suspenso no gate; não chamamos advanceUntilIdle ainda
+        assertTrue(vm.uiState.value.isLoading)
+        assertTrue(vm.uiState.value.isEditing)
+
+        gate.complete(Unit)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertFalse(vm.uiState.value.isLoading)
+    }
+
     // --- Helpers ---
 
     private fun tarefa(
@@ -308,11 +353,15 @@ private class FakeTaskRepository : TaskRepository {
     var createCount = 0
     var updateCount = 0
 
+    var gateOnCreate: CompletableDeferred<Unit>? = null
+    var gateOnGetById: CompletableDeferred<Unit>? = null
+
     override fun getAll(isCompleted: Boolean?): Flow<List<Task>> = tasks
 
     override fun getById(id: TaskId): Flow<Task?> {
         return flow {
             failOnGetById?.let { throw it }
+            gateOnGetById?.await()
             emitAll(tasks.map { list -> list.find { it.id == id } })
         }
     }
@@ -320,6 +369,7 @@ private class FakeTaskRepository : TaskRepository {
     override suspend fun create(task: Task) : TaskId {
         createCount++
         failOnCreate?.let { throw it }
+        gateOnCreate?.await()
         tasks.value += task
         return task.id
     }
