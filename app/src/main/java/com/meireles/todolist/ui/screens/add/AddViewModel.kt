@@ -66,6 +66,7 @@ class AddViewModel
         /**
          * Carrega a tarefa de [id] de forma reativa e atualiza o estado do formulário.
          */
+        @RequiresApi(Build.VERSION_CODES.O)
         private fun load(id: TaskId) {
             loadJob?.cancel()
             loadJob =
@@ -95,6 +96,7 @@ class AddViewModel
                                         title = task.title.value,
                                         description = task.description?.value.orEmpty(),
                                         isCompleted = task.isCompleted,
+                                        createdAt = task.createdAt.toEpochMilli(),
                                         isValid = task.title.value.isNotBlank(),
                                         error = null,
                                     )
