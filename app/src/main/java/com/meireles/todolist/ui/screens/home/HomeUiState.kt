@@ -8,7 +8,6 @@ import com.meireles.todolist.domain.model.Task
  *
  * @property isLoading indica operação em andamento.
  * @property tasks lista de tarefas exibidas na UI.
- * @property selectedTask tarefa selecionada, usada para destacar o item.
  * @property counts agregado com contagens (total, concluídas, ativas).
  * @property filterCompleted filtro atual por status de conclusão
  *   (`true` = concluídas, `false` = em andamento, `null` = todas).
@@ -17,7 +16,6 @@ import com.meireles.todolist.domain.model.Task
 data class HomeUiState(
     val isLoading: Boolean = false,
     val tasks: List<Task> = emptyList(),
-    val selectedTask: Task? = null,
     val counts: TaskCounts? = null,
     val filterCompleted: Boolean? = null,
     val error: String? = null,
