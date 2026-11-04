@@ -6,6 +6,7 @@ plugins {
     id("com.google.dagger.hilt.android")
     alias(libs.plugins.kotlin.serialization)
     id("org.jlleitschuh.gradle.ktlint")
+    id("pl.droidsonroids.pitest")
 }
 
 android {
@@ -39,6 +40,48 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
+}
+
+pitest {
+    // Pacote alvo de testes
+    targetClasses.set(listOf(
+        "com.meireles.todolist.ui.screens.add.*",
+        "com.meireles.todolist.ui.screens.home.*",
+    ))
+
+    // Arquivos de testes
+    targetTests.set(listOf(
+        "com.meireles.todolist.ui.screens.add.AddViewModelTest",
+        "com.meireles.todolist.ui.screens.home.HomeViewModelTest"
+    ))
+
+    // Evitar mutações no código interno do Kotlin
+    avoidCallsTo.set(setOf(
+        "kotlin.jvm.internal",
+        "kotlinx.coroutines"
+    ))
+
+    // Conjunto de mutações abrangente
+    mutators.set(setOf("STRONGER"))
+
+    // Formato do relatório
+    outputFormats.set(setOf("HTML", "XML"))
+
+    // Define temporariamente com 0 para evitar falha de build por taxa de mutação
+    // abaixo do limite
+    mutationThreshold.set(0)
+}
+
+configurations.all {
+    resolutionStrategy {
+        force("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
+        force("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0")
+        force("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0")
     }
 }
 
@@ -82,4 +125,7 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    //Tests
+    testImplementation(libs.kotlinx.coroutines.test)
 }
