@@ -245,6 +245,25 @@ class HomeViewModelTest {
         assertEquals("Erro ao carregar tarefas", vm.uiState.value.error)
     }
 
+    // --- Combate aos Mutantes ---
+
+    @Test
+    fun `setFilter false filtra tarefas em andamento`() = runTest(dispatcher) {
+        repository.tasks.value = listOf(
+            tarefa(1, concluida = false),
+            tarefa(2, concluida = true),
+        )
+        val vm = HomeViewModel(repository)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        vm.setFilter(false)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(1, vm.uiState.value.tasks.size)
+        assertFalse(vm.uiState.value.tasks.single().isCompleted)
+        assertEquals(false, vm.uiState.value.filterCompleted)
+    }
+
     // --- Helpers ---
 
     private fun tarefa(
