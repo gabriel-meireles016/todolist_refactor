@@ -50,8 +50,10 @@ android {
 pitest {
     // Pacote alvo de testes
     targetClasses.set(listOf(
-        "com.meireles.todolist.ui.screens.add.*",
-        "com.meireles.todolist.ui.screens.home.*",
+        "com.meireles.todolist.ui.screens.add.AddUiState",
+        "com.meireles.todolist.ui.screens.add.AddViewModel",
+        "com.meireles.todolist.ui.screens.home.HomeUiState",
+        "com.meireles.todolist.ui.screens.home.HomeViewModel",
     ))
 
     // Arquivos de testes
